@@ -1,0 +1,187 @@
+#First of all we are going to import all the libraries needed for our code
+from datetime import datetime
+import random as rd
+import numpy as np
+
+#Up next we are going to create the dictionary with all the different districts in Madrid with the mean time in minutes to get to class
+#as the value. 
+districts = dict ()
+districts["Centro"] = 25
+districts["Arganzuela"] = 35
+districts["Retiro"] = 30
+districts["Salamanca"] = 20
+districts["Chamartin"] = 10
+districts["Tetuan"] = 15
+districts["Chamberi"] = 20
+districts["Fuencarral-ElPardo"] = 45
+districts["Moncloa-Aravaca"] = 37
+districts["Latina"] = 43
+districts["Carabanchel"] = 47
+districts["Usera"] = 44
+districts["Puente de Vallecas"] = 48
+districts["Moratalaz"] = 36
+districts["Ciudad Lineal"] = 18
+districts["Hortaleza"] = 26
+districts["Villaverde"] = 51
+districts["Villa de Vallecas"] = 57
+districts["Vicalvaro"] = 53
+districts["San Blas-Canillejas"] = 39
+districts["Barajas"] = 41
+
+print("These are all of the districts available in our service at the moment, if you don't find your district we will soon have it!")
+print("Once you locate your district remember the comuting time assigned to it, as shown on the screen!")
+
+times = [25, 35, 30, 20, 10, 15, 20, 45, 37, 43, 47, 44, 48, 37, 18, 26, 51, 57, 53, 39, 41]
+data = districts.items()
+districtslist = list(data)
+print(districtslist)
+
+
+
+#Now we will do a quicksort algorithm to organize our times list in terms of the time spent commuting.
+
+def quicksort(array):
+    if len(array) < 2:
+        return(array)
+    else:
+        min_array = []
+        max_array = []
+        pivotnum = array.pop(len(array)//2)
+        for i in range(0, len(array)):
+            if pivotnum > array[i]:
+                min_array.append(array[i])
+            elif pivotnum < array[i]:
+                max_array.append(array[i])
+        return quicksort(min_array) + [pivotnum] + quicksort(max_array)
+
+sortedtimes = quicksort(times)
+print(sortedtimes)
+
+
+#Now that our list is sorted we want to use a binary sort algorithm so the user knows in what position of the time list his or
+#her commuting time is located in.
+
+def binarySearch(listName, item):
+    low = 0
+    high = len(listName)-1
+    while low <= high:
+        mid = int((low+high)/2)
+        guess = listName[mid]
+        if guess == item:
+            return(mid)
+        if guess > item:
+            high = mid - 1
+        else:
+            low = mid + 1
+    print(None)
+
+comtime = int(input("What is your commuting time according to the list you see on the screen? "))
+pos = binarySearch(sortedtimes, comtime)
+print(f"Your commuting time is in position {pos} of the list starting with 0.")
+
+#Now that we have all of our different districts with a storage value as the mean time spent comuting form those districts to the
+#IE tower, we can proceed to built the required functions & algorithms.
+
+print("If you have found your district upon the list keep going, your alarm will be set shortly! Otherwise you will get a Keyerror.")
+
+#In the next step we will ask the user in what district of madrid he lives in and the program will return the exact time in minutes
+#he will spend comuting.
+
+home = input("Please indicate in what district of Municipal Madrid you live in: ")
+(districts[home])
+
+
+#On top of the precise hour which we will store in the alarm_time variable we also need to store the date, because  the time in
+#our computers is based as YYYY-MM-DD HH:MM:SS format so before setting our alarm we must ask the user for the precise date in which he
+#has class on. 
+
+alarm_day = input("Please enter the day in which you have class on in 'YYYY-MM-DD' format: ")
+
+#In the next step we will ask the user to enter the hour in the format we ask for, for the function to validate it.
+#If a class starts at 09:00:00 the user must type 08:59:00, for the program to work correctly. In this first step we are
+#just asking the user to type in the time in which he or she has class to see if they understood the format. And because it is
+#and AM/PM don't forget that 13 is 01 for example.
+
+class_time = "12:00:00 PM"
+
+def validate_time(class_time):
+    if len(class_time) != 11:
+        return print("Invalid format try again 'HH:MM:SS AM/PM' format!")
+    else:
+        if int(class_time[0:2]) > 12:
+            return "Invalid hour format! Please try again 0-12!"
+        elif int(class_time[3:5]) > 60:
+            return "Invalid minute format! Please try again 0-59!"
+        elif int(class_time[6:8]) > 60:
+            return "Invalid second format! Please try again 0-59"
+        else:
+            return "Perfect"
+
+
+#With this while loop we confirm at the time in which the class starts by asking the user for the time again and validating it
+#with the previosly defined validate_time function.
+#This is the current date!
+print(f"The current date is {datetime.now()}.")
+
+
+while True:
+    class_time = input("Please enter the time at which you have class tomorrow in 'HH:MM:SS AM/PM' format: ")
+
+    validate1 = validate_time(class_time.lower())
+    if validate1 != "Perfect":
+        print(validate1)
+    else:
+        print(f"Your class starts at {class_time}.")
+        break
+
+
+#Now we have to set the alarm which we will do by equalizing the class time minus the minutes spent comuting and equalizing it to
+#our current time. 
+alarm_hour = class_time[0:2] 
+alarm_min = int(class_time[3:5]) - districts[home]
+if alarm_min < 10:
+    alarm_min = "0" + str(alarm_min)
+alarm_sec = class_time[6:8]
+alarm_period = class_time[9:].upper()
+
+#Alarm time will be the precise time in which the alarm will send a message to the user alerting him that he has to leave his home.
+alarm_time = (alarm_hour + ":" + str(alarm_min) + ":"+ alarm_sec + " " + alarm_period)
+print(f"Alarm is set for {alarm_time}.")
+
+
+#Finally we will  do a while loop in which the alarm won't go off until the alarm_gooff variable is equal in all of its variables
+#hour, minutes, seconds & period
+
+while True:
+    now = datetime.now()
+
+    current_hour = now.strftime("%I")
+    current_min = now.strftime("%M")
+    current_sec = now.strftime("%S")
+    current_period = now.strftime("%p")
+    
+
+    if alarm_time == current_hour + ":" + current_min + ":" + current_sec + " " + current_period:
+        print("Get out you have to get to the IE tower.")
+        break
+
+#For the development purposes of the app we will like to ask a final question to evaluate the happyness of our users.
+
+print("Finally we will like to know if you made to class on time and if you are happy with the services offered at BIE ON TIME.")
+
+ontime = input("Did you arrive on time to class 'YES/NO'?: ")
+
+if ontime == "YES":
+    print("GREAT TILL NEXT TIME")
+else:
+    print("WE WILL ADAPT OUR TIMESHEETS SO YOU CAN BIE ON TIME NEXT TIME!")
+    
+
+ontime = input("Are you happy with the service 'YES/NO'?: ")
+
+if ontime == "YES":
+    print("GREAT TILL NEXT TIME")
+else:
+    input("What would you change?: ")
+    print("Thanks for the feedback!")
+
